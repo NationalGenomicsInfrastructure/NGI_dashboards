@@ -47,7 +47,7 @@ def make_dashboards(outdir, demo, couch_user, password, couch_server, genstat_ur
     # Paths relative to make_dashboards/templates/
     internal_fn = os.path.join('internal','index.html')
     external_fn = os.path.join('external','index.html')
-    portal_fn = os.path.join('portal','index.html')
+    ngi_website_fn = os.path.join('ngi_website','index.html')
 
 
     ### GET THE INTERNAL DATA
@@ -93,14 +93,14 @@ def make_dashboards(outdir, demo, couch_user, password, couch_server, genstat_ur
         env = jinja2.Environment(loader=jinja2.FileSystemLoader(templates_dir))
         internal_template = env.get_template(internal_fn)
         external_template = env.get_template(external_fn)
-        portal_template = env.get_template(portal_fn)
+        ngi_website_template = env.get_template(ngi_website_fn)
     except:
         raise IOError ("Could not load dashboard template files")
 
     # Render templates and save
     internal_output_fn = os.path.join(outdir, internal_fn)
     external_output_fn = os.path.join(outdir, external_fn)
-    portal_output_fn = os.path.join(outdir, portal_fn)
+    ngi_website_output_fn = os.path.join(outdir, ngi_website_fn)
 
     # Internal template
     internal_output = internal_template.render(d = data_internal)
@@ -118,13 +118,13 @@ def make_dashboards(outdir, demo, couch_user, password, couch_server, genstat_ur
     except IOError as e:
         raise IOError ("Could not print report to '{}' - {}".format(external_output_fn, IOError(e)))
 
-    # Portal template
-    portal_output = portal_template.render(d = data_external, dt_data = dtimes_json)
+    # ngi_website template
+    ngi_website_output = ngi_website_template.render(d = data_external, dt_data = dtimes_json)
     try:
-        with open (os.path.join(outdir, portal_output_fn), 'w') as f:
-            print(portal_output, file=f)
+        with open (os.path.join(outdir, ngi_website_output_fn), 'w') as f:
+            print(ngi_website_output, file=f)
     except IOError as e:
-        raise IOError ("Could not print report to '{}' - {}".format(portal_output_fn, IOError(e)))
+        raise IOError ("Could not print report to '{}' - {}".format(ngi_website_output_fn, IOError(e)))
 
 
 
@@ -137,5 +137,3 @@ if __name__ == '__main__':
         click.secho("Could not open the config file {}".format(conf_file), fg="red")
         config = {}
     make_dashboards(default_map=config)
-
-
