@@ -24,7 +24,7 @@ def update_kpi(couch_user, password, couch_server):
     """
     Connect to StatusDB projects and flowcell databases and
     compute current KPIs to be added to a new document in the kpi database.
-    This script should be run every hour, and it should have a yaml configuration 
+    This script should be run every hour, and it should have a yaml configuration
     file in '$HOME/.dashbordrc' with program parameters:
 
         couch_user: foo_user
@@ -47,6 +47,10 @@ def update_kpi(couch_user, password, couch_server):
     p_samples = projects_db.view('project/samples')
     p_dates = projects_db.view('project/summary_dates', group_level=1)
     w_proj = worksets_db.view('project/ws_proj')
+    # Temporary measure to investigate intermittent issue Aug-2020
+    for i in range(0,2):
+        if len(w_proj) == 0:
+            w_proj = worksets_db.view('project/ws_proj')
     b_samples = bioinfo_db.view('genomics_dashboard/run_lane_sample_status')
 
     kpis = {}
@@ -79,7 +83,7 @@ def update_kpi(couch_user, password, couch_server):
     kpis["t_finproj_90th"] = TaTFinlibProj_90th()
     kpis["t_seq_90th"] = TaTSequencing_90th()
     kpis["t_bioinfo_90th"] = TaTBioinfo_90th()
-    
+
     logging.info("Generating KPIs")
     for proj_key, doc in ProjectViewsIter(p_summary, p_samples, p_dates, w_proj, b_samples):
         logging.debug("Processing project: {}".format(proj_key))
@@ -101,7 +105,7 @@ def update_kpi(couch_user, password, couch_server):
     out["version"] = p_version
     with open(limit_file, "rU") as f:
         out["limits"] = json.load(f)
-    #GAH! Too much repetition! I should probably rewrite this part 
+    #GAH! Too much repetition! I should probably rewrite this part
     out["process_load"] = {
             "initial_qc_samples": kpis["pl_rcsamples"].summary(),
             "initial_qc_lanes": kpis["pl_rclanes"].summary(),
@@ -141,7 +145,7 @@ def update_kpi(couch_user, password, couch_server):
             "library_prep_project_90th": kpis["t_libproj_90th"].summary(),
             "bioinformatics_90th": kpis["t_bioinfo_90th"].summary(),
             "sequencing_90th": kpis["t_seq_90th"].summary()
-            
+
     }
     out["projects"] = {
             "opened_last_7_days": kpis["p_oseven"].summary(),
@@ -164,4 +168,3 @@ if __name__ == '__main__':
         click.secho("Could not open the config file {}".format(conf_file), fg="red")
         config = {}
     update_kpi(default_map=config)
-
