@@ -4,8 +4,6 @@
 Script to get data_internal from KPI data_internalbase and render dashboard HTML files.
 """
 
-from __future__ import print_function
-
 import click
 from datetime import datetime
 from distutils.dir_util import copy_tree
@@ -13,7 +11,7 @@ import logging
 import jinja2
 import json
 import os
-import urllib
+import urllib.request
 import yaml
 
 logging.basicConfig(level=logging.WARNING,
@@ -26,12 +24,11 @@ with open (os.path.join(os.path.dirname(script_dir), 'version.txt')) as f:
     p_version = f.read()
 
 # Command line options
-@click.command( context_settings = dict( help_option_names = ['-h', '--help'] ))
+@click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('--outdir', '-o', required=True, help = "Create dashboards in the specified output directory.")
-@click.option('--demo', is_flag=True)
 @click.option('--genstat_url', '-g', default="https://genomics-status.scilifelab.se")
 @click.version_option(p_version)
-def make_dashboards(outdir, demo, genstat_url):
+def make_dashboards(outdir, genstat_url):
     """
     Function to get data_internal from KPI data_internalbase and render dashboard HTML files.
     """
@@ -39,7 +36,7 @@ def make_dashboards(outdir, demo, genstat_url):
     ### CONFIGURATION VARS
     templates_dir = os.path.join(script_dir, 'templates')
     outdir = os.path.realpath(outdir)
-    logging.info("Making reports in {}".format(outdir))
+    logging.info("Making reports in {}".format(outdir)) #TODO: logging not printing
     # Paths relative to make_dashboards/templates/
     external_fn = os.path.join('external','index.html')
     ngi_website_fn = os.path.join('ngi_website','index.html')
@@ -48,7 +45,7 @@ def make_dashboards(outdir, demo, genstat_url):
     ### GET THE EXTERNAL DATA
     external_url = '{}/api/v1/stats'.format(genstat_url)
     with urllib.request.urlopen(external_url) as url:
-        data_external = json.load(url.read())
+        data_external = json.loads(url.read().decode('utf-8'))
     data_external['date_rendered'] = datetime.now().strftime("%Y-%m-%d, %H:%M")
     data_external['p_version'] = p_version
     # Translations for lowercase keys
@@ -60,7 +57,7 @@ def make_dashboards(outdir, demo, genstat_url):
     ### GET THE DELIVERY TIMES DATA
     dtimes_url = '{}/api/v1/stats/year_deliverytime_application'.format(genstat_url)
     with urllib.request.urlopen(dtimes_url) as url:
-        dtimes = json.load(url.read())
+        dtimes = json.loads(url.read().decode('utf-8'))
     dtimes_json = json.dumps(dtimes, indent=4)
 
     ### RENDER THE TEMPLATES
@@ -81,17 +78,17 @@ def make_dashboards(outdir, demo, genstat_url):
     ngi_website_output_fn = os.path.join(outdir, ngi_website_fn)
 
     # External template
-    external_output = external_template.render(d = data_external, dt_data = dtimes_json)
+    external_output = external_template.render(d=data_external, dt_data=dtimes_json)
     try:
-        with open (os.path.join(outdir, external_output_fn), 'w') as f:
+        with open(os.path.join(outdir, external_output_fn), 'w') as f:
             print(external_output, file=f)
     except IOError as e:
         raise IOError ("Could not print report to '{}' - {}".format(external_output_fn, IOError(e)))
 
     # ngi_website template
-    ngi_website_output = ngi_website_template.render(d = data_external, dt_data = dtimes_json)
+    ngi_website_output = ngi_website_template.render(d=data_external, dt_data=dtimes_json)
     try:
-        with open (os.path.join(outdir, ngi_website_output_fn), 'w') as f:
+        with open(os.path.join(outdir, ngi_website_output_fn), 'w') as f:
             print(ngi_website_output, file=f)
     except IOError as e:
         raise IOError ("Could not print report to '{}' - {}".format(ngi_website_output_fn, IOError(e)))
