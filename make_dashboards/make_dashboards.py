@@ -47,7 +47,8 @@ def make_dashboards(outdir, demo, genstat_url):
 
     ### GET THE EXTERNAL DATA
     external_url = '{}/api/v1/stats'.format(genstat_url)
-    data_external = json.load(urllib.urlopen(external_url))
+    with urllib.request.urlopen(external_url) as url:
+        data_external = json.load(url.read())
     data_external['date_rendered'] = datetime.now().strftime("%Y-%m-%d, %H:%M")
     data_external['p_version'] = p_version
     # Translations for lowercase keys
@@ -58,7 +59,8 @@ def make_dashboards(outdir, demo, genstat_url):
 
     ### GET THE DELIVERY TIMES DATA
     dtimes_url = '{}/api/v1/stats/year_deliverytime_application'.format(genstat_url)
-    dtimes = json.load(urllib.urlopen(dtimes_url))
+    with urllib.request.urlopen(dtimes_url) as url:
+        dtimes = json.load(url.read())
     dtimes_json = json.dumps(dtimes, indent=4)
 
     ### RENDER THE TEMPLATES
