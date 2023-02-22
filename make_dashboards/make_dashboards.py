@@ -36,7 +36,7 @@ def make_dashboards(outdir, genstat_url):
     ### CONFIGURATION VARS
     templates_dir = os.path.join(script_dir, 'templates')
     outdir = os.path.realpath(outdir)
-    logging.info("Making reports in {}".format(outdir)) #TODO: logging not printing
+    logging.info("Making reports in {}".format(outdir))
     # Paths relative to make_dashboards/templates/
     external_fn = os.path.join('external','index.html')
     ngi_website_fn = os.path.join('ngi_website','index.html')
