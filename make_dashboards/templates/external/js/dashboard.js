@@ -369,11 +369,7 @@ function make_affiliations_plot(){
     var pdata = Array();
     for(i=0; i<ykeys.length; i++){
         var thiskey = ykeys[i];
-        if(data['key_names'][thiskey] != undefined){
-            thiskey = data['key_names'][thiskey];
-        }
         pdata.push([thiskey, ydata[ykeys[i]]]);
-
     }
 
     $('#affiliations_plot').highcharts({
