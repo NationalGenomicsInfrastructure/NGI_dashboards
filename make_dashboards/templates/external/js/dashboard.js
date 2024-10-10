@@ -1,7 +1,7 @@
 // Javascript for the NGI Stockholm Internal Dashboard
 var plot_height = 415;
 var num_months = 6;
-var start_date = moment().subtract(num_months, 'months').format('YYYY-MM');
+var start_date = moment(data['date_rendered']).subtract(num_months, 'months').format('YYYY-MM');
 
 $(function () {
 
@@ -17,13 +17,10 @@ $(function () {
             plotOptions: { series: { animation: false } }
         });
 
-        // Header clock
-        updateClock();
-
-        // Cron job runs on the hour, every hour. Get the web page to reload at 5 past the next hour
-        var reloadDelay = moment().add(1, 'hours').startOf('hour').add(5, 'minutes').diff();
+        // Reload the page every 30 minutes
+        var reloadDelay = 1000*60*30;
         setTimeout(function(){ location.reload(); }, reloadDelay );
-        console.log("Reloading page in "+Math.floor(reloadDelay/(1000*60))+" minutes");
+        console.log("Reloading page in "+Math.floor(reloadDelay / 1000 / 60)+" minutes");
 
         // Check that the returned data is ok
         if ('error_status' in data){
@@ -369,11 +366,7 @@ function make_affiliations_plot(){
     var pdata = Array();
     for(i=0; i<ykeys.length; i++){
         var thiskey = ykeys[i];
-        if(data['key_names'][thiskey] != undefined){
-            thiskey = data['key_names'][thiskey];
-        }
         pdata.push([thiskey, ydata[ykeys[i]]]);
-
     }
 
     $('#affiliations_plot').highcharts({
@@ -520,19 +513,3 @@ function make_throughput_plot(){
 }
 
 
-function updateClock(){
-    var now = moment(),
-        second = now.seconds() * 6,
-        minute = now.minutes() * 6 + second / 60,
-        hour = ((now.hours() % 12) / 12) * 360 + 90 + minute / 12;
-
-    $('#hour').css("transform", "rotate(" + hour + "deg)");
-    $('#minute').css("transform", "rotate(" + minute + "deg)");
-    $('#second').css("transform", "rotate(" + second + "deg)");
-    $('#clock_time').text( moment().format('HH:mm') );
-    $('#clock_date').text( moment().format('dddd Do MMMM') );
-
-    var updated = moment($('#date_rendered').text());
-    $('#report_age').text( moment().from(updated, true) );
-    setTimeout(updateClock, 1000);
-}

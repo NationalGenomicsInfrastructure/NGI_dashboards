@@ -48,7 +48,6 @@
   <em>(<span id="report_age"></span>)</em> &nbsp; / &nbsp;
   <a href="https://github.com/NationalGenomicsInfrastructure/NGI_dashboards" target="_blank">NGI Dashboards Package</a>, Version: <span>v{{ d.p_version }}</span>
 </div>
-
 <script src="https://code.highcharts.com/highcharts.js"></script>
 <script src="https://code.highcharts.com/highcharts-more.js"></script>
 <script src="https://code.highcharts.com/modules/solid-gauge.js"></script>
@@ -449,9 +448,6 @@ jQuery(function($) {
       var pdata = Array();
       for(i=0; i<ykeys.length; i++){
           var thiskey = ykeys[i];
-          if(data['key_names'][thiskey] != undefined){
-              thiskey = data['key_names'][thiskey];
-          }
           pdata.push([thiskey, ydata[ykeys[i]]]);
 
       }

@@ -49,9 +49,25 @@ def make_dashboards(outdir, genstat_url):
     data_external['date_rendered'] = datetime.now().strftime("%Y-%m-%d, %H:%M")
     data_external['p_version'] = p_version
     # Translations for lowercase keys
+    key_names = {}
     with open("key_names.yaml", 'r') as f:
-        data_external['key_names'] = yaml.load(f, Loader=yaml.SafeLoader)
+       key_names = yaml.load(f, Loader=yaml.SafeLoader)
 
+    # filter data_external project_user_affiliations to only include ones in key_names.yaml
+    temp_affi = {}
+    for date, projects in data_external['project_user_affiliations'].items():
+        # update project key names
+        temp_affi[date] = {}
+        for name, count in projects.items():
+            lower_p = name.lower()
+            if lower_p in key_names.keys():
+                temp_affi[date][key_names[lower_p]] = count
+            elif "Other" not in temp_affi[date].keys():
+                temp_affi[date]["Other"] = count
+            else:
+                temp_affi[date]["Other"] += count
+            
+    data_external['project_user_affiliations'] = temp_affi
     data_external['json'] = json.dumps(data_external, indent=4)
 
     ### GET THE DELIVERY TIMES DATA
